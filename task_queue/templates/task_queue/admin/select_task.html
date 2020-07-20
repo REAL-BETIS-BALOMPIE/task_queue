@@ -1,0 +1,52 @@
+{% extends "task_queue/admin/custom_form.html" %}
+
+{% block title %}{{ select_task_title }}{% endblock %}
+{% block subtitle %}{{ select_task_subtitle }}{% endblock %}
+
+{% block csrf_token %}{% endblock %}
+
+{% block form_method %}GET{% endblock %}
+
+{% block inputs %}
+    <input class="default" type="submit" value="Configure">
+{% endblock %}
+
+
+{% block before_inputs %}
+    {% if task_descriptions|length > 0 %}
+        <div id="task_descriptions">
+            {% for task in task_descriptions %}
+            <div id="{{task.0}}" class="task-descriptor" style="display: none;">
+                <p><strong>{{ task.1.0 }}</strong></p>
+                <p>{{ task.1.1|default:'-' }}</p>
+                {{ task.1.2|safe }}
+            </div>
+            {% endfor %}
+        </div>
+        <hr style="margin-bottom: 16px">
+    {% endif %}
+{% endblock %}
+
+{% block custom_js %}
+    <script>
+    var taskDescriptors = document.querySelectorAll('.task-descriptor');
+    var input = document.getElementById('id__q_task');
+
+    function setActive(task_id) {
+        taskDescriptors.forEach(function (elm) {
+            if (elm.id === task_id) {
+                elm.style.display = 'block'
+            } else {
+                elm.style.display = 'none'
+            }
+        })
+    }
+
+    if (input && taskDescriptors) {
+        input.onchange = function (e) {
+            setActive(e.target.value)
+        };
+        setActive(input.value)
+    }
+    </script>
+{% endblock %}

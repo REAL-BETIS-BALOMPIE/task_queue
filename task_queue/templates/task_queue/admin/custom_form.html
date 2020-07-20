@@ -1,0 +1,61 @@
+{% extends "admin/base_site.html" %}default
+
+{%  load static %}
+
+{% block extrahead %}
+    <script src='{% static "admin_tools/js/jquery/jquery.min.js" %}' ></script>
+    {{ form.media }}
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">{% endblock %}
+
+{% block content %}
+    <div id="content">
+        <h1>{% block title %}{% endblock %}</h1>
+        <h3>{% block subtitle %}{% endblock %}</h3>
+        <br>
+        {% block before_content %}{% endblock %}
+        <div id="content_main">
+            <form method="{% block form_method %}{% endblock %}">
+                {% block csrf_token %}{% csrf_token %}{% endblock %}
+                <div>
+                    <fieldset class="module aligned">
+                        {{ form.non_field_errors }}
+                        {% for field in form %}
+                        <div class="form-row{% if form.errors %} errors{% endif %}{% if field.name %} field-{{ field.name }}{% endif %} {% if field.is_hidden %}hidden{%  endif %}">
+                                <div{% if field.is_checkbox %} class="checkbox-row"{% endif %}>
+                                    {% if not field.field.is_readonly %}{{ field.errors }}{% endif %}
+                                    {% if field.is_checkbox %}
+                                        {{ field }}{{ field.label_tag }}
+                                    {% else %}
+                                        {{ field.label_tag }}
+                                        {% if field.field.is_readonly %}
+                                            <div class="readonly">{{ field.contents|default:field.initial }}</div>
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if field.help_text %}
+                                        <div class="help">{{ field.help_text|safe }}</div>
+                                    {% endif %}
+                                </div>
+                        </div>
+                        {% endfor %}
+                    </fieldset>
+                    {% block before_inputs %}
+                    {% endblock %}
+                    <div class="submit-row">
+                        {% block inputs %}{% endblock %}
+                    </div>
+                    {% block after_inputs %}
+                    {% endblock %}
+                </div>
+            </form>
+        </div>
+    </div>
+    {% block content_end %}
+    {% endblock %}
+    {% block custom_js %}
+    {% endblock %}
+{%  endblock %}
+

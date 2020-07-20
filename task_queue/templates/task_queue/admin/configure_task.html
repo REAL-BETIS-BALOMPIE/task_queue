@@ -1,0 +1,26 @@
+{% extends "task_queue/admin/custom_form.html" %}
+
+{% block title %}Launch Task {{ task_name }}:{% endblock %}
+
+{% block form_method %}POST{% endblock %}
+
+{% block inputs %}
+    <p class="deletelink-box"><input style="background-color: #ba2121" type="submit" value="Run Immediately" name="_op_run"></p>
+    <input type="submit" value="Run on next state save" name="_op_state">
+    <input type="submit" value="Run after current task" name="_op_next">
+    <input type="submit" value="Append to Queue end" name="_op_append">
+    <input class="default" type="submit" value="Insert by priority" name="_op_insert"> {# TODO: Use constants #}
+{% endblock %}
+
+{% block before_inputs %}
+    {% if task_description %}
+        <div id="task_description">
+            <div id="{{task_description.0}}" class="task-descriptor">
+                <p><strong>{{ task_description.1.0 }}</strong></p>
+                <p>{{ task_description.1.1|default:'-' }}</p>
+                {{ task_description.1.2|safe }}
+            </div>
+        </div>
+        <hr style="margin-bottom: 16px">
+    {% endif %}
+{% endblock %}

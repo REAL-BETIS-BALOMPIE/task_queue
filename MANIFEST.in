@@ -1,0 +1,2 @@
+recursive-include task_queue/templates *
+recursive-include *.py

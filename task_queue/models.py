@@ -509,7 +509,7 @@ class TaskQueue(BaseModel):
         :param raise_exception: Raise QueueWorkerNotRunning exception
         :return: list of tasks, empty list, (None or exception depending on raise_exception)
         """
-        from transfermarkt import celery_app
+        from celery import current_app as celery_app
 
         if not celery_active:
             celery_active = celery_app.control.inspect().active()

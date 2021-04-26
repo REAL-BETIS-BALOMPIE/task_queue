@@ -22,6 +22,7 @@ from task_queue.forms import (
     SelectTaskForm, ConfigureTaskForm, CreateTaskTemplateForm, SelectQueueForm, SelectQueuePriorityForm)
 from task_queue.models import QueueTaskTemplate, QueueTaskGroup, QueueTask
 from task_queue.permissions import SuperuserRequired
+from task_queue import settings
 from task_queue.tasks import BaseQueueTask
 from task_queue.typing import OPERATION_TYPE
 
@@ -182,7 +183,7 @@ class TaskLauncherView(TaskConfigureBaseView):
     create_template = 'task_queue/admin/configure_task.html'
     select_task_title = 'Launch Task'
     select_task_subtitle = 'Select a task to configure'
-    success_url = '/admin'
+    success_url = settings.ADMIN_SUCCESS_URL
 
     def on_form_valid(self, form):
         form.create_task()
@@ -194,7 +195,7 @@ class CreateTaskTemplateView(AdminAddResponseView, TaskConfigureBaseView):
     model = QueueTaskTemplate
     select_task_title = 'Create Task Template'
     select_task_subtitle = 'Select a task to configure'
-    success_url = '/admin'
+    success_url = settings.ADMIN_SUCCESS_URL
 
     def on_form_valid(self, form: CreateTaskTemplateForm):
         self.result_object = form.save()
@@ -205,7 +206,7 @@ class SelectQueueBaseView(FormView):
     form_class = SelectQueueForm
     select_queue_title = 'Select Queue'
     select_queue_subtitle = ''
-    success_url = '/admin'
+    success_url = settings.ADMIN_SUCCESS_URL
     template_name = "task_queue/admin/select_queue.html"
 
     def get_context_data(self, **kwargs):

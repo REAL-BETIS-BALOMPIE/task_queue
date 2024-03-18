@@ -2,20 +2,18 @@ import io
 import json
 import time
 
-import jsonfield
 import os
 import threading
 import uuid
 
 from celery.contrib.abortable import AbortableAsyncResult
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
-from jsonfield.encoder import JSONEncoder as JsonfieldJSONEncoder
 
 from django.conf import settings
 from django.core.files import File
 from django.db import models, transaction
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from task_queue.constants import (
     QUEUE_TASK_CHOICES, QUEUE_TASK_CREATED, QUEUE_TASK_RUNNING,
@@ -25,7 +23,7 @@ from task_queue.constants import (
 )
 from task_queue.exceptions import CurrentTaskNoneException, QueueWorkerNotRunning
 from task_queue.helpers import get_celery_task
-from task_queue.json import DateJSONDecoder
+from task_queue.json import DateJSONDecoder, JSONEncoder
 from task_queue.log import LOG_DATE_PATTERN
 from task_queue.managers import QueueTaskQuerySet
 
@@ -60,14 +58,16 @@ class QueueTaskBase(BaseModel):
         verbose_name=_('Task Class'),
         max_length=100
     )
-    task_args = jsonfield.JSONField(
-        load_kwargs={'cls': DateJSONDecoder},
+    task_args = models.JSONField(
+        decoder=DateJSONDecoder,
+        encoder=JSONEncoder,
         verbose_name=_('Task args'),
         default=list,
         blank=True
     )
-    task_kwargs = jsonfield.JSONField(
-        load_kwargs={'cls': DateJSONDecoder},
+    task_kwargs = models.JSONField(
+        decoder=DateJSONDecoder,
+        encoder=JSONEncoder,
         verbose_name=_('Task kwargs'),
         default=dict,
         blank=True
@@ -222,7 +222,7 @@ class QueueTask(QueueTaskBase):
                 if state is not None:
                     filename = f'{str(self.id)}.json'
                     bt = io.BytesIO()
-                    bt.write(json.dumps(state, cls=JsonfieldJSONEncoder).encode('utf8'))
+                    bt.write(json.dumps(state, cls=JSONEncoder).encode('utf8'))
 
                     if self.last_state:
                         self.last_state.delete(save=False)

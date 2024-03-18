@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="task_queue-dander94", # Replace with your own username
-    version="0.1.1d5",
+    version="0.1.1+d5",
     author="dander94",
     author_email="",
     description="Task Queue Handler for Celery",

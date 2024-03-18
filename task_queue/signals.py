@@ -23,4 +23,4 @@ def post_delete_scheduledqueuetaskgroup(sender, instance, **kwargs):
     instance.periodic_task.delete()
 
 
-task_done = django.dispatch.Signal(providing_args=['instance'])
+task_done = django.dispatch.Signal()

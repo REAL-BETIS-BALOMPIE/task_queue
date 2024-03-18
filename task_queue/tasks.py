@@ -5,7 +5,8 @@ from dateutil.relativedelta import relativedelta as rd
 
 from celery import current_app as celery_app
 from celery.contrib.abortable import AbortableTask, AbortableAsyncResult
-from celery.task import Task, task as celery_task
+from celery import shared_task as celery_task
+from celery.app.task import Task
 from celery.utils.log import get_task_logger
 
 from django import forms

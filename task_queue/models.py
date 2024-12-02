@@ -799,9 +799,12 @@ class ScheduledQueueTaskGroup(BaseModel):
              update_fields=None):
         from task_queue.tasks import RunScheduledQueueTaskGroup
         if not self.periodic_task:
+            pt_count = PeriodicTask.objects.filter(name__startswith=self.task_group.name).count()
+            name = self.task_group.name if pt_count == 0 else '{}_{}'.format(self.task_group.name, pt_count)
+
             pt = PeriodicTask.objects.create(
                 crontab=self.crontab_schedule,
-                name=self.task_group.name,
+                name=name,
                 task=RunScheduledQueueTaskGroup.full_classname(),
                 kwargs=json.dumps({
                     'scheduled_id': str(self.id)

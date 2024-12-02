@@ -790,7 +790,7 @@ class ScheduledQueueTaskGroup(BaseModel):
 
     def delete(self, **kwargs):
         periodic_task = self.periodic_task
-        res = super().delete(self, **kwargs)
+        res = super().delete(**kwargs)
         if periodic_task:
             periodic_task.delete()
         return res

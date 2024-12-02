@@ -788,13 +788,6 @@ class ScheduledQueueTaskGroup(BaseModel):
         verbose_name = _('Scheduled Queue Task Group')
         verbose_name_plural = _('Scheduled Queue Task Groups')
 
-    def delete(self, **kwargs):
-        periodic_task = self.periodic_task
-        res = super().delete(**kwargs)
-        if periodic_task:
-            periodic_task.delete()
-        return res
-
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         from task_queue.tasks import RunScheduledQueueTaskGroup

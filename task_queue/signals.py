@@ -18,5 +18,9 @@ def post_delete_queuetaskatnexttasks(sender, instance, **kwargs):
         position=models.F('position') - 1
     )
 
+def post_delete_scheduledqueuetaskgroup(sender, instance, **kwargs):
+    if instance.periodic_task:
+        instance.periodic_task.delete()
+
 
 task_done = django.dispatch.Signal()

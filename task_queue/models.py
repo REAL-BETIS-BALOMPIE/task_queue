@@ -197,8 +197,17 @@ class QueueTask(QueueTaskBase):
                 if not self.log:
                     self._create_log()
                 msg = f'[{timezone.now().strftime(LOG_DATE_PATTERN)}]: {msg}\n'
-                with self.log.open('a') as log_file:
-                    log_file.write(msg)
+                attempt = 0
+                while attempt < 5:
+                    try:
+                        with self.log.open('a') as log_file:
+                            log_file.write(msg)
+                    except PermissionError:
+                        attempt += 1
+                        time.sleep(0.1)
+                    else:
+                        break
+
             finally:
                 self.log_lock.release()
 

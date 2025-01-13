@@ -181,6 +181,12 @@ class QueueTask(QueueTaskBase):
         self.state_lock = threading.Lock()
         super().__init__(*args, **kwargs)
 
+        if self.log and not self.log.storage.exists(self.log.name):
+            self.log = None
+
+        if self.last_state and not self.last_state.storage.exists(self.last_state.name):
+            self.last_state = None
+
     def save(self, *args, **kwargs):
         self.last_activity_at = timezone.now()
         super(QueueTask, self).save(*args, **kwargs)

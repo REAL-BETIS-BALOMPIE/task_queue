@@ -232,9 +232,15 @@ class QueueTask(QueueTaskBase):
             return {}
 
         self.last_state.seek(0)
-        res = json.loads(self.last_state.read().decode('utf8'), cls=DateJSONDecoder)
-        self.last_state.close()
-        self.state_lock.release()
+        try:
+            res = json.loads(self.last_state.read().decode('utf8'), cls=DateJSONDecoder)
+        except json.JSONDecodeError:
+            self.last_state.close()
+            self.last_state = None
+            self.save(update_fields=('last_state', ))
+            res = {}
+        finally:
+            self.state_lock.release()
         return res
 
     def save_state(self, state: dict):

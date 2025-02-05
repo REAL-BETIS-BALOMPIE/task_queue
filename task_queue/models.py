@@ -519,6 +519,7 @@ class TaskQueue(BaseModel):
                     self.run_current_task()
         if not was_stopped:
             self.allow_consuming()
+        return task
 
     def run_next(self):
         with transaction.atomic():

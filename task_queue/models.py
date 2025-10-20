@@ -198,13 +198,16 @@ class QueueTask(QueueTaskBase):
 
     def save(self, *args, **kwargs):
         self.last_activity_at = timezone.now()
-        super(QueueTask, self).save(*args, **kwargs)
+        update_fields = kwargs.pop('update_fields', None)
+        if update_fields and 'last_activity_at' not in update_fields:
+            update_fields = [*update_fields, 'last_activity_at']
+        super(QueueTask, self).save(*args, **{**kwargs, **({'update_fields': update_fields} if update_fields else {})})
 
     def _create_log(self):
         filename = f'{str(self.id)}.log'
         bt = io.BytesIO()
         self.log = File(bt, filename)
-        self.save()
+        self.save(update_fields=('log', ))
 
     def add_log(self, msg):
         if self.log_lock.acquire(blocking=True, timeout=15):
@@ -258,7 +261,7 @@ class QueueTask(QueueTaskBase):
                         self.last_state.delete(save=False)
 
                     self.last_state = File(bt, filename)
-                    self.save()
+                    self.save(update_fields=('last_state', ))
                     self.last_state.close()
                     break
             except OSError as e:
@@ -285,26 +288,26 @@ class QueueTask(QueueTaskBase):
 
     def set_status_aborted(self):
         self.process_status = QUEUE_TASK_ABORTED
-        self.save()
+        self.save(update_fields=('process_status', ))
         self.notify_queue_aborted()
 
     def set_status_error(self, traceback=''):
         self.last_traceback = traceback
         self.process_status = QUEUE_TASK_ERROR
-        self.save()
+        self.save(update_fields=('process_status', 'last_traceback'))
         self.notify_queue_error()
 
     def set_status_running(self):
         self.process_status = QUEUE_TASK_RUNNING
         self.started_running_at = timezone.now()
-        self.save()
+        self.save(update_fields=('process_status', 'started_running_at'))
 
     def set_status_done(self):
         from task_queue.signals import task_done
 
         self.process_status = QUEUE_TASK_DONE
         self.finished_at = timezone.now()
-        self.save()
+        self.save(update_fields=('process_status', 'finished_at'))
         self.notify_queue_done()
         transaction.on_commit(lambda: task_done.send(sender=self.__class__, instance=self))
 
@@ -390,7 +393,7 @@ class TaskQueue(BaseModel):
                 task=task
             ).delete()
         self.current_task = task
-        self.save()
+        self.save(update_fields=('current_task', ))
 
     def on_current_task_done(self):
         self.done_tasks.add(self.current_task)
@@ -410,11 +413,11 @@ class TaskQueue(BaseModel):
 
     def forbid_consuming(self):
         self.is_consuming_stopped = True
-        self.save()
+        self.save(update_fields=('is_consuming_stopped', ))
 
     def allow_consuming(self):
         self.is_consuming_stopped = False
-        self.save()
+        self.save(update_fields=('is_consuming_stopped', ))
 
     def insert_task_by_priority(self, task):
         with transaction.atomic():
@@ -492,7 +495,7 @@ class TaskQueue(BaseModel):
         kwargs['queued_task_id'] = str(task.id)
         result = task_func.apply_async(queue=self.celery_queue, args=args, kwargs=kwargs, countdown=0.5)
         task.async_result_id = result.id
-        task.save()
+        task.save(update_fields=('async_result_id', ))
 
     def run_task(self, task, wait_to_state=False):
         was_stopped = self.is_consuming_stopped
@@ -507,13 +510,13 @@ class TaskQueue(BaseModel):
                 if self.state_waiting_task:
                     self.insert_task_at_position(self.state_waiting_task, 0)
                     self.state_waiting_task = None
-                    self.save()
+                    self.save(update_fields=('state_waiting_task', ))
                 if wait_to_state:
                     if self.state_waiting_task:
                         # We replace the current waiting for the new one
                         self.insert_task_at_position(self.state_waiting_task, 0)
                     self.state_waiting_task = task
-                    self.save()
+                    self.save(update_fields=('state_waiting_task', ))
                 else:
                     self._set_current_task(task)
                     self.run_current_task()

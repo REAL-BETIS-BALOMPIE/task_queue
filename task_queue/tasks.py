@@ -279,7 +279,7 @@ class BaseQueueMultipleTask(BaseQueueTask):
             task_created = task.run_next(*task_args, queue_id=queue.id, **task_kwargs)
             db_task = task_created.task
             db_task.parent_task = self.queue_task_object
-            db_task.save()
+            db_task.save(update_fields=('parent_task', ))
             self.log(f'Created task {db_task} ({str(db_task.id)})')
 
 
@@ -334,7 +334,7 @@ def check_queues():
                             obj.current_task.set_status_aborted()
                             obj.insert_task_at_position(obj.current_task, 0)
                             obj.current_task = real_task_running
-                            obj.save()
+                            obj.save(update_fields=('current_task', ))
                             real_task_running.get_celery_task().run_now(
                                 *real_task_running.task_args, queue_id=str(obj.id), wait_to_state=False,
                                 existing_id=str(real_task_running.id), **real_task_running.task_kwargs

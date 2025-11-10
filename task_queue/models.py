@@ -446,10 +446,12 @@ class TaskQueue(BaseModel):
                 self.queuetaskatnexttasks_set.filter(
                     position__gte=position
                 ).update(position=models.F('position') + 1)
-            task_created = self.queuetaskatnexttasks_set.create(
+            task_created = self.queuetaskatnexttasks_set.update_or_create(
                 task=task,
-                position=position
-            )
+                defaults={
+                    'position': position
+                }
+            )[0]
             if not was_stopped:
                 self.allow_consuming()
         self.refresh_from_db()

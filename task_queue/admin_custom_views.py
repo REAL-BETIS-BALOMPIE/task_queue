@@ -295,7 +295,10 @@ class LaunchTaskAgainView(LaunchTaskTemplateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['default_priority'] = self.get_object().priority
-        kwargs['default_queue'] = getattr(self.get_object().queue, 'id', None)
+        try:
+            kwargs['default_queue'] = getattr(self.get_object().queue, 'id', None)
+        except QueueTask.RelatedObjectDoesNotExist:
+            pass
         return kwargs
 
     def get_object(self):

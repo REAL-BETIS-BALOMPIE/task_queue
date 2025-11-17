@@ -562,7 +562,7 @@ class TaskQueue(BaseModel):
             active_tasks = self.get_active_tasks(raise_exception=True)
 
         if len(active_tasks) == 0 and (
-                self.current_task and self.current_task.process_status == QUEUE_TASK_RUNNING) or (
+                self.current_task and self.current_task.process_status in [QUEUE_TASK_CREATED, QUEUE_TASK_RUNNING]) or (
                     not self.current_task and (self.next_tasks.exists() or self.state_waiting_task)):
             return True
         return False

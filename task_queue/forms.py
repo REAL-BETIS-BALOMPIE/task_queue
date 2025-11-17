@@ -132,12 +132,12 @@ class CreateTaskTemplateForm(BaseTaskForm):
 
 
 class SelectQueueForm(forms.Form):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, default_queue=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields[f'{INTERNAL_PREFIX}queue'] = forms.ChoiceField(
             label='Queue',
             choices=TaskQueue.objects.values_list('id', 'name'),
-            initial=str(get_default_queue().id)
+            initial=default_queue or str(get_default_queue().id)
         )
 
     def get_action(self):

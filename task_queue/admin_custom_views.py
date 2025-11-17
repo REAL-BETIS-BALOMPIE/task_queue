@@ -20,7 +20,7 @@ from task_queue.constants import (
 from task_queue.helpers import get_celery_task
 from task_queue.forms import (
     SelectTaskForm, ConfigureTaskForm, CreateTaskTemplateForm, SelectQueueForm, SelectQueuePriorityForm)
-from task_queue.models import QueueTaskTemplate, QueueTaskGroup, QueueTask
+from task_queue.models import QueueTaskTemplate, QueueTaskGroup, QueueTask, TaskQueue
 from task_queue.permissions import SuperuserRequired
 from task_queue import settings
 from task_queue.tasks import BaseQueueTask
@@ -297,7 +297,7 @@ class LaunchTaskAgainView(LaunchTaskTemplateView):
         kwargs['default_priority'] = self.get_object().priority
         try:
             kwargs['default_queue'] = getattr(self.get_object().queue, 'id', None)
-        except QueueTask.RelatedObjectDoesNotExist:
+        except TaskQueue.DoesNotExist:
             pass
         return kwargs
 

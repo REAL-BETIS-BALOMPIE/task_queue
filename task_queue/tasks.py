@@ -326,7 +326,7 @@ def check_queues():
             elif len(active_tasks):
                 if obj.current_task and (obj.current_task.async_result_id != active_tasks[0]['id']):
                     if issue_detected == active_tasks[0]['id']:
-                        logger.warn(f'Current task is different from task running. Fixing.')
+                        logger.warn('Current task is different from task running. Fixing.')
                         real_task_running = QueueTask.objects.filter(async_result_id=active_tasks[0]['id']).first()
                         if not real_task_running:
                             logger.warn(f'{obj}: Weird case. Current Task running does not exist.')
@@ -355,9 +355,9 @@ def check_queues():
                 # Issue fixed
                 issue_detected = None
             elif had_issue_detected and not issue_detected:
-                logger.warn(f'The issue has disappeared')
+                logger.warn('The issue has disappeared')
             elif not had_issue_detected and issue_detected:
-                logger.warn(f'Issue was detected. Waiting next execution to fix it')
+                logger.warn('Issue was detected. Waiting next execution to fix it')
 
         except QueueWorkerNotRunning:
             logger.error(f'{obj}: Worker is not running')

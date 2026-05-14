@@ -276,7 +276,12 @@ class BaseQueueMultipleTask(BaseQueueTask):
                 task_args, task_kwargs = getattr(self, f'args_kwargs_{task.__name__}')(*args, **kwargs)
             else:
                 task_args, task_kwargs = args, kwargs
-            task_created = task.run_next(*task_args, queue_id=queue.id, **task_kwargs)
+            task_created = task.run_next(
+                *task_args,
+                queue_id=queue.id,
+                defaults={'priority': self.queue_task_object.priority,  **task_kwargs.get('defaults', {})},
+                **task_kwargs,
+            )
             db_task = task_created.task
             db_task.parent_task = self.queue_task_object
             db_task.save(update_fields=('parent_task', ))

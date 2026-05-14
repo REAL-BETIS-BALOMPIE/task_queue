@@ -102,14 +102,19 @@ class ConfigureTaskForm(BaseTaskForm):
         operation: OPERATION_TYPE = next(key for key in self.data.keys() if key.startswith(OPERATION_TYPE_PREFIX))
         args, kwargs = self.get_task_args_kwargs(params)
 
+        defaults = {
+            **kwargs.get('defaults', {}),
+            'priority': priority,
+        }
+
         if operation == OPERATION_TYPE_INSERT:
             task.insert_at_queue(*args, queue_id=queue_id, priority=priority, **kwargs)
         elif operation == OPERATION_TYPE_APPEND:
-            task.append_to_queue(*args, queue_id=queue_id, **kwargs)
+            task.append_to_queue(*args, queue_id=queue_id, defaults=defaults, **kwargs)
         elif operation == OPERATION_TYPE_RUN_NEXT:
-            task.run_next(*args, queue_id=queue_id, **kwargs)
+            task.run_next(*args, queue_id=queue_id, defaults=defaults, **kwargs)
         elif operation in [OPERATION_TYPE_RUN_STATE, OPERATION_TYPE_RUN_NOW]:
-            task.run_now(*args, queue_id=queue_id, wait_to_state=operation == OPERATION_TYPE_RUN_STATE, **kwargs)
+            task.run_now(*args, queue_id=queue_id, defaults=defaults, wait_to_state=operation == OPERATION_TYPE_RUN_STATE, **kwargs)
 
 
 class CreateTaskTemplateForm(BaseTaskForm):
